@@ -1,0 +1,11 @@
+{
+  "name": "listings",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/listings/src",
+  "prefix": "ns",
+  "tags": ["scope:listings", "type:lib"],
+  "targets": {
+    "lint": { "executor": "@nx/eslint:lint" }
+  }
+}

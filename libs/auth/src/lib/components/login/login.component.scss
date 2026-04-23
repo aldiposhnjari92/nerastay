@@ -1,0 +1,78 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  &__logo { font-size: 2.5rem; text-align: center; }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 0;
+    color: var(--text-primary);
+  }
+
+  &__subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    margin: -12px 0 0;
+    font-size: 0.9rem;
+  }
+
+  &__footer {
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin: 0;
+    a { color: var(--primary); font-weight: 600; text-decoration: none; }
+  }
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+}
+
+.btn--google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #f8fafc; }
+  &:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+}

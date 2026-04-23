@@ -1,0 +1,125 @@
+@if (listingsStore.loading()) {
+  <ns-spinner label="Loading listing…" />
+} @else if (listing(); as l) {
+  <article class="detail">
+    <!-- Photo Gallery -->
+    <section class="gallery" aria-label="Photo gallery">
+      <div class="gallery__main">
+        <img
+          [src]="l.photos[activePhoto()] || '/assets/placeholder.jpg'"
+          [alt]="l.name + ' — photo ' + (activePhoto() + 1) + ' of ' + l.photos.length"
+          class="gallery__hero" />
+
+        <div class="gallery__badge" aria-label="{{ l.type }} listing">
+          @switch (l.type) {
+            @case ('hotel') { <span>🏨 Hotel</span> }
+            @case ('restaurant') { <span>🍽️ Restaurant</span> }
+            @case ('villa') { <span>🏡 Villa</span> }
+          }
+        </div>
+      </div>
+
+      @if (l.photos.length > 1) {
+        <div class="gallery__thumbs" role="list" aria-label="Photo thumbnails">
+          @for (photo of l.photos; track $index) {
+            <button
+              role="listitem"
+              class="gallery__thumb"
+              [class.gallery__thumb--active]="activePhoto() === $index"
+              (click)="activePhoto.set($index)"
+              [attr.aria-label]="'View photo ' + ($index + 1)"
+              [attr.aria-current]="activePhoto() === $index ? 'true' : null">
+              <img [src]="photo" alt="" loading="lazy" />
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <div class="detail__layout">
+      <!-- Main Content -->
+      <div class="detail__main">
+        <a routerLink="/listings" class="back-link" aria-label="Back to listings">
+          ← Back to listings
+        </a>
+
+        <header class="detail__header">
+          <h1 class="detail__name">{{ l.name }}</h1>
+          <p class="detail__location">{{ l.address }}, {{ l.city }}, {{ l.country }}</p>
+
+          <div class="detail__meta">
+            <ns-star-rating [value]="l.rating" [count]="l.reviewCount" />
+            <span class="detail__price" aria-label="Price range {{ priceLabel(l.priceRange) }}">
+              {{ priceLabel(l.priceRange) }}
+            </span>
+            @if (l.featured) {
+              <span class="featured-badge" aria-label="Featured listing">⭐ Featured</span>
+            }
+          </div>
+        </header>
+
+        <p class="detail__desc">{{ l.description }}</p>
+
+        <!-- Tags / Amenities -->
+        @if (l.tags.length > 0) {
+          <section class="tags" aria-labelledby="tags-heading">
+            <h2 id="tags-heading" class="section-label">Amenities &amp; Features</h2>
+            <ul class="tags__list" role="list">
+              @for (tag of l.tags; track tag) {
+                <li class="tags__item">✓ {{ tag }}</li>
+              }
+            </ul>
+          </section>
+        }
+
+        <!-- Map link -->
+        <a [href]="mapUrl(l.coordinates.lat, l.coordinates.lng)"
+           target="_blank" rel="noopener noreferrer"
+           class="map-link"
+           aria-label="Open {{ l.name }} in Google Maps (opens in new tab)">
+          🗺️ View on Google Maps
+        </a>
+      </div>
+
+      <!-- Booking / Contact Sidebar -->
+      <aside class="sidebar" aria-label="Contact and booking">
+        <div class="sidebar__card">
+          <h2 class="sidebar__title">Contact &amp; Book</h2>
+          <p class="sidebar__location">📍 {{ l.city }}</p>
+
+          <div class="sidebar__divider"></div>
+
+          <a [href]="'mailto:contact@nerastay.com?subject=Enquiry about ' + l.name"
+             class="btn btn--primary btn--full">
+            Send Enquiry
+          </a>
+
+          @if (authStore.isLoggedIn()) {
+            <a [routerLink]="['/bookings/new']" [queryParams]="{ listingId: l.id }"
+               class="btn btn--outline btn--full" style="margin-top: 10px">
+              Book Now
+            </a>
+          } @else {
+            <a routerLink="/auth/login" class="btn btn--outline btn--full" style="margin-top: 10px">
+              Sign in to Book
+            </a>
+          }
+        </div>
+
+        @if (authStore.uid() === l.ownerId) {
+          <div class="sidebar__owner-actions">
+            <a [routerLink]="['/listings', l.id, 'edit']" class="btn btn--ghost btn--full">
+              ✏️ Edit Listing
+            </a>
+          </div>
+        }
+      </aside>
+    </div>
+  </article>
+} @else if (!listingsStore.loading()) {
+  <div class="not-found" role="main">
+    <span aria-hidden="true">🔍</span>
+    <h1>Listing Not Found</h1>
+    <a routerLink="/listings" class="btn btn--primary">Browse All Listings</a>
+  </div>
+}

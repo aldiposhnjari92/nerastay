@@ -1,0 +1,195 @@
+<div class="listing-form-page">
+  <div class="listing-form-wrap">
+    <header class="form-header">
+      <h1 class="form-header__title">
+        {{ editId() ? 'Edit Listing' : 'Publish Your Business' }}
+      </h1>
+      <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="progress()" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar__fill" [style.width]="progress() + '%'"></div>
+      </div>
+      <div class="steps" aria-label="Form steps">
+        @for (s of steps; track $index) {
+          <span class="steps__step"
+                [class.steps__step--active]="step() === $index"
+                [class.steps__step--done]="step() > $index"
+                [attr.aria-current]="step() === $index ? 'step' : null">
+            {{ s }}
+          </span>
+        }
+      </div>
+    </header>
+
+    @if (listingsStore.error()) {
+      <div class="alert alert--error" role="alert">{{ listingsStore.error() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- Step 0: Basic Info -->
+      @if (step() === 0) {
+        <fieldset class="form-step" aria-label="Basic information">
+          <legend class="sr-only">Step 1: Basic Information</legend>
+
+          <div class="form-field">
+            <label class="form-label">Business Type</label>
+            <div class="type-selector" role="group" aria-label="Select business type">
+              @for (t of typeOptions; track t) {
+                <label class="type-option" [class.type-option--active]="form.value.type === t">
+                  <input type="radio" formControlName="type" [value]="t" class="sr-only" />
+                  <span class="type-option__icon" aria-hidden="true">
+                    @switch (t) {
+                      @case ('hotel') { 🏨 }
+                      @case ('restaurant') { 🍽️ }
+                      @case ('villa') { 🏡 }
+                    }
+                  </span>
+                  {{ t | titlecase }}
+                </label>
+              }
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="name" class="form-label">Business Name *</label>
+            <input id="name" type="text" class="input" formControlName="name"
+                   placeholder="e.g. Grand Palazzo Hotel" aria-required="true"
+                   [attr.aria-invalid]="invalid('name') ? 'true' : null" />
+            @if (invalid('name')) {
+              <span class="form-error" role="alert">Name is required (min 3 characters).</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label for="description" class="form-label">Description *</label>
+            <textarea id="description" class="input input--textarea" formControlName="description"
+                      placeholder="Describe what makes your business special…" rows="5"
+                      aria-required="true" [attr.aria-invalid]="invalid('description') ? 'true' : null"></textarea>
+            @if (invalid('description')) {
+              <span class="form-error" role="alert">Description is required (min 50 characters).</span>
+            }
+          </div>
+        </fieldset>
+      }
+
+      <!-- Step 1: Location -->
+      @if (step() === 1) {
+        <fieldset class="form-step" aria-label="Location details">
+          <legend class="sr-only">Step 2: Location</legend>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="address" class="form-label">Street Address *</label>
+              <input id="address" type="text" class="input" formControlName="address" aria-required="true" />
+              @if (invalid('address')) { <span class="form-error" role="alert">Address is required.</span> }
+            </div>
+            <div class="form-field">
+              <label for="city" class="form-label">City *</label>
+              <input id="city" type="text" class="input" formControlName="city" aria-required="true" />
+              @if (invalid('city')) { <span class="form-error" role="alert">City is required.</span> }
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="country" class="form-label">Country *</label>
+            <input id="country" type="text" class="input" formControlName="country" aria-required="true" />
+          </div>
+
+          <div class="form-field">
+            <p class="form-label">GPS Coordinates *</p>
+            <button type="button" class="btn btn--outline btn--sm" (click)="useMyLocation()">
+              📍 Use My Location
+            </button>
+            <div class="form-row" style="margin-top: 12px">
+              <div class="form-field">
+                <label for="lat" class="form-label">Latitude</label>
+                <input id="lat" type="number" class="input" formControlName="lat" step="0.000001" placeholder="e.g. 41.9028" />
+                @if (invalid('lat')) { <span class="form-error" role="alert">Valid latitude required.</span> }
+              </div>
+              <div class="form-field">
+                <label for="lng" class="form-label">Longitude</label>
+                <input id="lng" type="number" class="input" formControlName="lng" step="0.000001" placeholder="e.g. 12.4964" />
+                @if (invalid('lng')) { <span class="form-error" role="alert">Valid longitude required.</span> }
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      }
+
+      <!-- Step 2: Photos -->
+      @if (step() === 2) {
+        <fieldset class="form-step" aria-label="Business photos">
+          <legend class="form-step__legend">Upload Photos</legend>
+          <ns-photo-upload [maxFiles]="10" (filesSelected)="onPhotosSelected($event)" />
+        </fieldset>
+      }
+
+      <!-- Step 3: Details -->
+      @if (step() === 3) {
+        <fieldset class="form-step" aria-label="Additional details">
+          <legend class="form-step__legend">Details &amp; Amenities</legend>
+
+          <div class="form-field">
+            <label class="form-label">Price Range *</label>
+            <div class="price-options" role="radiogroup" aria-label="Price range">
+              @for (p of [1, 2, 3, 4]; track p) {
+                <label class="price-option" [class.price-option--active]="form.value.priceRange === p">
+                  <input type="radio" formControlName="priceRange" [value]="p" class="sr-only" />
+                  <span aria-hidden="true">{{ '€'.repeat(p) }}</span>
+                  <span class="sr-only">{{ p }} out of 4</span>
+                </label>
+              }
+            </div>
+          </div>
+
+          <div class="form-field">
+            <p class="form-label">Amenities / Tags</p>
+            <div class="amenity-grid" role="group" aria-label="Select amenities">
+              @for (amenity of amenityOptions; track amenity) {
+                <button
+                  type="button"
+                  class="amenity-chip"
+                  [class.amenity-chip--active]="selectedAmenities().includes(amenity)"
+                  (click)="toggleAmenity(amenity)"
+                  [attr.aria-pressed]="selectedAmenities().includes(amenity)">
+                  {{ amenity }}
+                </button>
+              }
+            </div>
+          </div>
+        </fieldset>
+      }
+
+      <!-- Step 4: Review & Submit -->
+      @if (step() === 4) {
+        <fieldset class="form-step" aria-label="Review and submit">
+          <legend class="form-step__legend">Review Your Listing</legend>
+          <div class="review-grid">
+            <div class="review-item"><span>Name</span><strong>{{ form.value.name }}</strong></div>
+            <div class="review-item"><span>Type</span><strong>{{ form.value.type | titlecase }}</strong></div>
+            <div class="review-item"><span>City</span><strong>{{ form.value.city }}, {{ form.value.country }}</strong></div>
+            <div class="review-item"><span>Price</span><strong>{{ '€'.repeat(form.value.priceRange ?? 1) }}</strong></div>
+            <div class="review-item"><span>Photos</span><strong>{{ photos().length }} selected</strong></div>
+            <div class="review-item"><span>Tags</span><strong>{{ selectedAmenities().join(', ') || 'None' }}</strong></div>
+          </div>
+          <p class="review-note">Your listing will be reviewed by our team before going live (usually within 24 hours).</p>
+        </fieldset>
+      }
+
+      <!-- Navigation -->
+      <div class="form-nav">
+        @if (step() > 0) {
+          <button type="button" class="btn btn--ghost" (click)="prevStep()">← Back</button>
+        } @else {
+          <span></span>
+        }
+
+        @if (!isLastStep()) {
+          <button type="button" class="btn btn--primary" (click)="nextStep()">Continue →</button>
+        } @else {
+          <button type="submit" class="btn btn--primary" [disabled]="submitting() || listingsStore.loading()">
+            {{ submitting() ? 'Publishing…' : 'Publish Listing' }}
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+</div>

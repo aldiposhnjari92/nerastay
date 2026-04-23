@@ -1,0 +1,79 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function isListingHost(listingId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/listings/$(listingId)).data.hostId == request.auth.uid;
+    }
+
+    // Users
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Listings
+    match /listings/{listingId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isListingHost(listingId) || isAdmin();
+      allow delete: if isListingHost(listingId) || isAdmin();
+
+      // Availability subcollection
+      match /availability/{docId} {
+        allow read: if true;
+        allow write: if isListingHost(listingId) || isAdmin();
+      }
+
+      // Reviews subcollection
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isSignedIn() &&
+          request.resource.data.authorId == request.auth.uid;
+        allow update: if isAdmin() ||
+          (isSignedIn() && resource.data.authorId == request.auth.uid) ||
+          isListingHost(listingId);
+        allow delete: if isAdmin();
+      }
+    }
+
+    // Bookings
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn() &&
+        (resource.data.guestId == request.auth.uid ||
+         resource.data.hostId == request.auth.uid ||
+         isAdmin());
+      allow create: if isSignedIn() &&
+        request.resource.data.guestId == request.auth.uid;
+      allow update: if isAdmin() ||
+        (isSignedIn() && resource.data.hostId == request.auth.uid) ||
+        (isSignedIn() && resource.data.guestId == request.auth.uid &&
+         request.resource.data.status == 'cancelled');
+      allow delete: if isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isAdmin();
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+  }
+}

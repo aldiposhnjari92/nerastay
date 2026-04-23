@@ -1,0 +1,36 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isImageFile() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isUnder10MB() {
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Listing photos — hosts upload, anyone reads
+    match /listings/{listingId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && isImageFile() && isUnder10MB();
+    }
+
+    // User profile photos — owner uploads/reads
+    match /users/{uid}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth.uid == uid && isImageFile() && isUnder10MB();
+    }
+
+    // Review photos
+    match /reviews/{reviewId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && isImageFile() && isUnder10MB();
+    }
+  }
+}

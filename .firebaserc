@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "nerastay"
+  },
+  "targets": {
+    "nerastay": {
+      "hosting": {
+        "web": ["nerastay-web"],
+        "admin": ["nerastay-admin"]
+      }
+    }
+  }
+}

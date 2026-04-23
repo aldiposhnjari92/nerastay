@@ -1,0 +1,11 @@
+{
+  "name": "map",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/map/src",
+  "prefix": "ns",
+  "tags": ["scope:map", "type:lib"],
+  "targets": {
+    "lint": { "executor": "@nx/eslint:lint" }
+  }
+}

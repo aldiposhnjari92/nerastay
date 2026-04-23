@@ -4,25 +4,25 @@
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "ES2022",
     "module": "esnext",
-    "lib": ["es2020", "dom"],
+    "lib": ["ES2022", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
+    "strict": true,
     "paths": {
-      "@org/api/products": ["libs/api/products/src/index.ts"],
-      "@org/models": ["libs/shared/models/src/index.ts"],
-      "@org/shop/data": ["libs/shop/data/src/index.ts"],
-      "@org/shop/feature-product-detail": [
-        "libs/shop/feature-product-detail/src/index.ts"
-      ],
-      "@org/shop/feature-products": ["libs/shop/feature-products/src/index.ts"],
-      "@org/shop/shared-ui": ["libs/shop/shared-ui/src/index.ts"]
+      "@nerastay/shared": ["libs/shared/src/index.ts"],
+      "@nerastay/auth": ["libs/auth/src/index.ts"],
+      "@nerastay/ui": ["libs/ui/src/index.ts"],
+      "@nerastay/map": ["libs/map/src/index.ts"],
+      "@nerastay/listings": ["libs/listings/src/index.ts"],
+      "@nerastay/booking": ["libs/booking/src/index.ts"],
+      "@nerastay/reviews": ["libs/reviews/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
